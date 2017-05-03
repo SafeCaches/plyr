@@ -1,0 +1,230 @@
+<html lang="en">
+<head>
+  <title>video project</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/jquery.bxslider.min.css">
+  <script src="js/jquery-3.2.1.slim.min.js" type="text/javascript"></script>
+  <script src="js/jquery.bxslider.min.js" type="text/javascript"></script>
+  <script src="js/jquery.bxslider.min.js" type="text/javascript"></script>
+  <script src="js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12" class="header">
+        <div class="header-spacer"></div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 col-xs-10 col-xs-offset-1 col-md-offset-3 videos-container">
+          <div class="row video-selection-panel hide-selection-panel" >
+           <div class="col-md-4 col-xs-4  panelToggle form-group">
+            <span class="video-select-text row">Select Video:</span>
+            <select id="video-select" class="form-control">
+             <option value="0">video A</option>
+             <option value="1">video B</option>
+             <option value="2">video C</option>
+             <option value="3">video D</option>
+           </select>
+         </div>
+         <div class="col-md-7 col-xs-7 col-xs-offset-1 panelToggle col-md-offset-1" id="thumbs-container">
+         </div>
+       </div>
+       <div class="row">
+        <video  id="adVideo" class="videoToggle">
+          <source src="videos/ads.mp4" type="video/mp4" />
+        </video>
+        <div class="regular-video-container videoToggle" >
+
+          <video id="regular-video" poster="videos/posterA.jpg" data-plyr="{controls:['play-large']}" >
+            <source src="videos/videoA.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script src="https://cdn.plyr.io/2.0.12/plyr.js"></script>
+<script>
+var AdDuration = 5000;
+var VideosThumbs = "";
+var VideoPanel = $(".video-selection-panel");
+var VideoContainer = $(".videos-container");
+var Ad = true;
+var ChosenVideo = 0;
+var Forwards = 0;
+var VideoEnded=false;
+var videos = [{
+  src: 'videos/videoA.mp4',
+  type: 'video/mp4',
+  poster: "videos/posterA.jpg",
+  start: 60,
+  duration: 90
+}, {
+  src: 'videos/videoB.mp4',
+  type: 'video/mp4',
+  poster: "videos/posterB.jpg",
+  start: 2,
+  duration: 5
+}, {
+  src: 'videos/videoC.mp4',
+  type: 'video/mp4',
+  poster: "videos/posterC.jpg",
+  start: 0,
+  duration: 3
+}, {
+  src: 'videos/videoD.mp4',
+  type: 'video/mp4',
+  poster: "videos/posterD.jpg",
+  start: 4,
+  duration: 2
+}, ]
+var i = 0;
+VideosThumbs = "<span class='col-md-2 col-xs-2'></span>"
+for (v of videos) {
+  if (i == 0)
+    actif_class = "actif-video-thumb";
+  else actif_class = ""
+  VideosThumbs += "<span class='video-thumb col-md-2 col-xs-2 " + actif_class + "' style='background-image:url(" + v.poster + ")' index=" + i + " duration=" + v.duration + " start=" + v.start + "></span>";
+  i++;
+}
+var $VideosThumbs = $(VideosThumbs);
+$("#thumbs-container").html(VideosThumbs)
+$("#thumbs-container").find("span").click(function() {
+  $("#video-select").val($(this).attr("index")).trigger("change")
+})
+adVideo = plyr.setup('#adVideo', {
+  controls: [],
+  clickToPlay: false,
+  autoplay: true
+});
+var mainVideo = plyr.setup('#regular-video', {});
+var pauseped = false;
+var adInstance = adVideo[0];
+var instance = mainVideo[0];
+
+function toggleAd(p = 0) {
+Forwards = 0;
+VideoEnded=false;
+  if (p == "changed") {
+    instance.pause();
+    adInstance.play();
+    $("#regular-video").parent().parent().hide();
+    $("#adVideo").parent().parent().show();
+    Ad = true
+
+  } else {
+    Ad = false;
+    adInstance.stop();
+    instance.play();
+    instance.forward(videos[ChosenVideo].start)
+    $("#regular-video").parent().parent().show()
+    $("#adVideo").parent().parent().hide()
+  }
+  $(".videoToggle").toggle()
+  $(".panelToggle").toggle()
+}
+adInstance.on("play", function(e) {
+  setTimeout(function() {
+    toggleAd();
+  }, AdDuration)
+})
+
+instance.on('ready', function(event) {
+  $("#test").click(toggleAd);
+});
+instance.on("play", function(e) {
+  if((instance.getDuration()==instance.getCurrentTime()) || (instance.getCurrentTime() > videos[ChosenVideo].duration))
+    goToVideoEnd();
+  if(VideoEnded)
+    goToVideoStart()
+})
+instance.on("timeupdate", function(e) {
+    if ((instance.getCurrentTime() >= videos[ChosenVideo].duration) ) {
+      goToVideoEnd()
+    }
+})
+instance.on("ended",function(e){
+  VideoEnded=true;
+})
+instance.on("seeked", function(e) {
+  Forwards++;
+  if (Forwards>1) {
+    goToVideoEnd()
+  }
+})
+function goToVideoEnd() {
+  Forwards++;
+  instance.seek(instance.getDuration())
+}
+function goToVideoStart(){
+  VideoEnded=false;
+  Forwards=0;
+  instance.seek(videos[ChosenVideo].start)
+}
+// instance.on("ended",function(e){
+//     console.log("ended"+myforward);
+//   if(!myforward){
+//     ChosenVideo=parseInt(ChosenVideo)+1;
+//   if(ChosenVideo==4) ChosenVideo=0
+//   $("#video-select").val(ChosenVideo).trigger("change")
+//   }
+// })
+
+
+function showEffect() {
+  if (Ad != true) {
+    VideoPanel.css("display", "block")
+    VideoPanel.addClass("show-selection-panel")
+    VideoPanel.removeClass("hide-selection-panel");
+  }
+}
+
+function hideEffect() {
+  if (Ad == true) {
+    VideoPanel.css("display", "none")
+    VideoPanel.addClass("hide-selection-panel");
+    VideoPanel.removeClass("show-selection-panel");
+  } else {
+    VideoPanel.addClass("hide-selection-panel");
+    VideoPanel.removeClass("show-selection-panel");
+  }
+
+}
+
+
+$(document).ready(function() {
+  VideoContainer.hover(function() {
+    showEffect()
+  }, function() {
+    hideEffect()
+  })
+  VideoContainer.bind("touchstart", function() {
+    showEffect()
+  })
+  VideoContainer.bind("touchend", function() {
+    hideEffect()
+  })
+  $("#video-select").change(function() {
+    VideoPanel.addClass("hide-selection-panel");
+    VideoPanel.removeClass("show-selection-panel");
+    ChosenVideo = $(this).val()
+    instance.source({
+      type: 'video',
+      sources: [{
+        src: videos[ChosenVideo].src,
+        type: videos[ChosenVideo].type
+      }],
+      poster: videos[ChosenVideo].poster
+    });
+    $("#thumbs-container").find(".video-thumb").removeClass("actif-video-thumb")
+    $("#thumbs-container .video-thumb[index='" + ChosenVideo + "']").addClass("actif-video-thumb");
+    toggleAd("changed")
+  })
+})
+</script>
+<link rel="stylesheet" href="css/plyr.css">
+</body>
+</html>
