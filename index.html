@@ -61,13 +61,13 @@ var videos = [{
   type: 'video/mp4',
   poster: "videos/posterA.jpg",
   start: 6,
-  duration: 20
+  duration: 30
 }, {
   src: 'videos/videoB.mp4',
   type: 'video/mp4',
   poster: "videos/posterB.jpg",
-  start: 20,
-  duration: 5
+  start: 2,
+  duration: 15
 }, {
   src: 'videos/videoC.mp4',
   type: 'video/mp4',
@@ -109,25 +109,20 @@ function toggleAd(advert = 0) {
   if (advert) {
     Ad = false;
     adInstance.stop();
+    instance.forward(videos[ChosenVideo].start)
     instance.play();
     $("#regular-video").parent().parent().show()
     $("#adVideo").parent().parent().hide()
     $(".videoToggle").toggle()
     $(".panelToggle").toggle()
   } else {
-    Forwards = 0;
-    VideoEnded = false;
-    Ad = false;
-    instance.play();
-    instance.forward(videos[ChosenVideo].start)
+   
   }
 
 
 }
 var i = 0
 adInstance.on("timeupdate", function(e) {
-  console.log(e);
-  console.log(AdDuration + "----" + adInstance.getCurrentTime());
   if ((adInstance.getCurrentTime() >= AdDuration)) {
     i++
     if (i == 1) {
@@ -140,8 +135,7 @@ instance.on('ready', function(event) {
   $("#test").click(toggleAd);
 });
 instance.on("play", function(e) {
-  if ((instance.getDuration() == instance.getCurrentTime()) || (instance.getCurrentTime() > videos[ChosenVideo].duration))
-    goToVideoEnd();
+ 
   if (VideoEnded)
     goToVideoStart()
 })
@@ -155,12 +149,14 @@ instance.on("ended", function(e) {
 })
 instance.on("seeked", function(e) {
   Forwards++;
-  if (Forwards > 1) {
+  if (VideoEnded!=true && Forwards>1) {
+    console.log('test');
     goToVideoEnd()
   }
 })
 
 function goToVideoEnd() {
+  VideoEnded=true;
   Forwards++;
   instance.seek(instance.getDuration())
 }
@@ -218,7 +214,14 @@ $(document).ready(function() {
     });
     $("#thumbs-container").find(".video-thumb").removeClass("actif-video-thumb")
     $("#thumbs-container .video-thumb[index='" + ChosenVideo + "']").addClass("actif-video-thumb");
-    toggleAd()
+     Forwards = 0;
+    VideoEnded = false;
+    Ad = false;
+        setTimeout(function(){
+            instance.seek(videos[ChosenVideo].start)
+        },200)
+    instance.play();
+          
   })
 })
 </script>
