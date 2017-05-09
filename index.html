@@ -17,7 +17,19 @@
         <div class="header-spacer"></div>
       </div>
       <div class="row">
-        <div class="col-md-6 col-xs-10 col-xs-offset-1 col-md-offset-3 videos-container">
+        <div class="col-md-6 col-xs-10 col-xs-offset-1 col-md-offset-3 videos-container icons-container">
+            <div id="sidebar_right" class="overlay active icons-container row icon-selection-panel iconToggle">
+					<div id="button_hd" class="overlay_button hd" onclick="location.href='http://finisherpix.com';">
+						<div class="tooltip">Purchase HD Video</div>
+						<div class="inner colour"></div>
+						<div class="inner icon"></div>
+					</div>
+					<div id="button_photos" class="overlay_button camera" onclick="location.href='http://finisherpix.com';">
+						<div class="tooltip">See My Photos</div>
+						<div class="inner colour"></div>
+						<div class="inner icon"></div>
+					</div>
+				</div>
           <div class="row video-selection-panel hide-selection-panel" >
            <div class="col-md-4 col-xs-4  panelToggle form-group">
             <span class="video-select-text row">Select Video:</span>
@@ -50,6 +62,8 @@
 <script>
 var AdDuration = 5;
 var VideosThumbs = "";
+var IconPanel = $(".icon-selection-panel");
+var IconContainer = $(".icons-container");
 var VideoPanel = $(".video-selection-panel");
 var VideoContainer = $(".videos-container");
 var Ad = true;
@@ -133,11 +147,14 @@ adInstance.on("timeupdate", function(e) {
 
 instance.on('ready', function(event) {
   $("#test").click(toggleAd);
+    $(".iconToggle").toggle()
 });
 instance.on("play", function(e) {
  
   if (VideoEnded)
     goToVideoStart()
+    $(".iconToggle").toggle()
+
 })
 instance.on("timeupdate", function(e) {
   if ((instance.getCurrentTime() >= videos[ChosenVideo].duration)) {
@@ -170,8 +187,10 @@ function goToVideoStart() {
 function showEffect() {
   if (Ad != true) {
     VideoPanel.css("display", "block")
-    VideoPanel.addClass("show-selection-panel")
+    VideoPanel.addClass("show-selection-panel");
     VideoPanel.removeClass("hide-selection-panel");
+    IconPanel.addClass("show-icon-panel");
+    IconPanel.removeClass("hide-icon-panel");
   }
 }
 
@@ -180,9 +199,13 @@ function hideEffect() {
     VideoPanel.css("display", "none")
     VideoPanel.addClass("hide-selection-panel");
     VideoPanel.removeClass("show-selection-panel");
+      IconPanel.addClass("hide-icon-panel");
+    IconPanel.removeClass("show-icon-panel");
   } else {
     VideoPanel.addClass("hide-selection-panel");
     VideoPanel.removeClass("show-selection-panel");
+      IconPanel.addClass("hide-icon-panel");
+    IconPanel.removeClass("show-icon-panel");
   }
 
 }
@@ -200,9 +223,22 @@ $(document).ready(function() {
   VideoContainer.bind("touchend", function() {
     hideEffect()
   })
+    IconContainer.hover(function() {
+    showEffect()
+  }, function() {
+    hideEffect()
+  })
+  IconContainer.bind("touchstart", function() {
+    showEffect()
+  })
+  IconContainer.bind("touchend", function() {
+    hideEffect()
+  })
   $("#video-select").change(function() {
     VideoPanel.addClass("hide-selection-panel");
     VideoPanel.removeClass("show-selection-panel");
+      IconPanel.addClass("hide-icon-panel");
+    IconPanel.removeClass("show-icon-panel");
     ChosenVideo = $(this).val()
     instance.source({
       type: 'video',
@@ -224,6 +260,13 @@ $(document).ready(function() {
           
   })
 })
+
+    function iconLinks() {
+      var PurchaseHD = document.getElementById('button_hd');
+      var SeePhotos = document.getElementById('button_photos');
+        
+        button_hd.onclick = location.href='http://google.com';
+    };
 </script>
 <link rel="stylesheet" href="css/plyr.css">
 </body>
