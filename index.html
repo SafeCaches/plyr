@@ -160,6 +160,7 @@ instance.on("timeupdate", function(e) {
   if ((instance.getCurrentTime() >= videos[ChosenVideo].duration)) {
     goToVideoEnd()
   }
+    
 })
 instance.on("ended", function(e) {
   VideoEnded = true;
